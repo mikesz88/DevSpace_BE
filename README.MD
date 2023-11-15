@@ -17,7 +17,7 @@
 - Email: richard.olpindo@devspace.com
 - Password: 12345678
 
-### Quallin games
+### Quallin Games
 
 - Email: quallin.games@devspace.com
 - Password: 12345678
@@ -44,3 +44,47 @@
       - Message: Zod error about the body
     - 200 - Success
       - Message: {"success": true, "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NTUwNzUwMmQyMTIwNGU4NjJkOWZjYyIsImlhdCI6MTcwMDA4MDAwMCwiZXhwIjoxNzAwNjg0ODAwfQ.gCWQEBDMgfyIjyCXDDoSij-v_fCfKvg0bT3a8wtOwt4"}
+- Register
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/register
+  - POST
+  - BODY REQUIRED
+    - KEYS:
+      - email
+  - Response
+    - 401 - Unauthorized
+      - Message: 'Email is already registered.'
+      - Message: 'Email is not valid'
+    - 400 - Bad Body
+      - Message: Zod error about the body
+    - 201 - Success
+      - Message: {"success": true, "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NTUwNzUwMmQyMTIwNGU4NjJkOWZjYyIsImlhdCI6MTcwMDA4MDAwMCwiZXhwIjoxNzAwNjg0ODAwfQ.gCWQEBDMgfyIjyCXDDoSij-v_fCfKvg0bT3a8wtOwt4"}
+- Get Logged In User Info
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/me
+  - GET
+  - NO BODY
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer TOKEN
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"}
+    - 200 = Success - Example response:
+    - {
+      "success": true,
+      "data": {
+      "id": "655507502d21204e862d9fcc",
+      "firstName": null,
+      "lastName": null,
+      "username": "michael.sanchez",
+      "jobTitle": null,
+      "favMusic": null,
+      "favSlogan": null,
+      "biography": null,
+      "backgroundColor": null,
+      "complimentingColor": null,
+      "email": "michael.sanchez@devspace.com",
+      "createdAt": "2023-11-15T18:00:48.018Z",
+      "updatedAt": "2023-11-15T18:00:48.018Z"
+      }
+      }

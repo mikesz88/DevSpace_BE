@@ -9,6 +9,14 @@ export const LoginUser = z
 
 export type LoginUserType = z.infer<typeof LoginUser>;
 
+export const RegisterUser = z
+  .object({
+    email: z.string().email(),
+  })
+  .strict();
+
+export type RegisterUserType = z.infer<typeof RegisterUser>;
+
 export const jwtInfoSchema = z.object({
   id: z.string(),
   iat: z.number(),
