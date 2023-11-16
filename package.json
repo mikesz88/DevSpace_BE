@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=production node src/app.ts",
+    "start": "NODE_ENV=production ts-node src/app.ts",
     "dev": "nodemon",
     "seed": "ts-node prisma/seed.ts"
   },
@@ -37,3 +37,4 @@
     "zod-express-middleware": "^1.4.0"
   }
 }
+
