@@ -14,7 +14,7 @@ model User {
   id                 String    @id @default(auto()) @map("_id") @db.ObjectId
   firstName          String?
   lastName           String?
-  username           String   @unique
+  username           String    @unique
   jobTitle           String?
   favMusic           String?
   favSlogan          String?
@@ -22,6 +22,8 @@ model User {
   backgroundColor    String?
   complimentingColor String?
   password           Password?
+  avatar             Avatar?   @relation(fields: [avatarId], references: [id])
+  avatarId           String?   @db.ObjectId
   email              String    @unique
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -40,7 +42,7 @@ model Avatar {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   avatarURL String
+  users     User[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
