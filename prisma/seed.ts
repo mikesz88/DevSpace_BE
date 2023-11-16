@@ -1,5 +1,26 @@
 import db from './db.setup';
 import { saltValue } from '../src/utils/auth';
+import { avatars } from '../_data/avatar';
+
+interface AvatarObject {
+  title: string;
+  avatarURL: string;
+}
+
+const avatarsToDB = async (avatars: AvatarObject[]) => {
+  const mappedAvatars: Promise<any>[] = avatars.map((avatarObject) => {
+    return db.avatar.create({
+      data: {
+        title: avatarObject.title,
+        avatarURL: avatarObject.avatarURL,
+      },
+    });
+  });
+
+  await Promise.all(mappedAvatars);
+
+  console.log('Avatar Seeding complete');
+};
 
 const clearDb = async () => {
   await db.user.deleteMany();
@@ -9,6 +30,8 @@ const clearDb = async () => {
 export const seed = async () => {
   console.log('Seeding the database...');
   await clearDb();
+
+  await avatarsToDB(avatars);
 
   // seed here
   const michael = await db.user.create({
