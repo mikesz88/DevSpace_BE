@@ -1,4 +1,4 @@
-import { User as prismaUser } from '@prisma/client';
+// import { User as prismaUser } from '@prisma/client';
 import express from 'express';
 import 'express-async-errors';
 import cors from 'cors';
@@ -12,14 +12,14 @@ const hpp = require('hpp');
 
 export const app = express();
 
-dotenv.config();
-declare global {
-  namespace Express {
-    interface Request {
-      currentUser?: prismaUser;
-    }
-  }
-}
+// dotenv.config();
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       currentUser?: prismaUser;
+//     }
+//   }
+// }
 
 console.log(process.env.NODE_ENV);
 
