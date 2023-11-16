@@ -20,7 +20,12 @@ exports.jwtInfoSchema = zod_1.z.object({
 });
 exports.UpdatePartOneZObject = zod_1.z
     .object({
-    email: zod_1.z.string().email(),
+    firstName: zod_1.z.string(),
+    lastName: zod_1.z.string(),
+    username: zod_1.z.string(),
+    jobTitle: zod_1.z.string(),
+    password: zod_1.z.string().min(8),
+    confirmPassword: zod_1.z.string().min(8),
 })
     .strict();
 // UpdatePartOneType

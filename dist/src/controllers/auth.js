@@ -103,13 +103,66 @@ exports.randomColor = (0, asyncHandler_1.default)((req, res, _next) => __awaiter
         data: randomColor,
     });
 }));
-// * @desc Update Profile part one
-// * @route GET /api/v1/auth/registerPartOne
-// * @access PRIVATE
-exports.randomColor = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    const {} = req.body;
+// * @desc GET random Avatar
+// * @route GET /api/v1/auth/randomAvatar
+// * @access PUBLIC
+exports.randomAvatar = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const allAvatars = yield db_setup_1.default.avatar.findMany();
+    const randomAvatar = allAvatars[Math.floor(Math.random() * allAvatars.length)];
     res.status(200).json({
         success: true,
-        data: {},
+        data: randomAvatar.avatarURL,
+    });
+}));
+// * @desc Update Profile part one
+// * @route PATCH /api/v1/auth/updatePartOne
+// * @access PRIVATE
+exports.updatePartOne = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { firstName, lastName, username, jobTitle, password, confirmPassword, } = req.body;
+    if (password !== confirmPassword) {
+        return res.status(400).json({
+            success: false,
+            message: 'The password and Confirm password do not match.',
+        });
+    }
+    const allUsernames = yield db_setup_1.default.user.findMany({ select: { username: true } });
+    const isInvalidUsername = allUsernames.some((obj) => obj.username.toLowerCase() === username.toLowerCase());
+    if (isInvalidUsername) {
+        return res.status(400).json({
+            success: false,
+            message: 'The username is already taken by someone else. Try another one.',
+        });
+    }
+    yield db_setup_1.default.user.update({
+        where: {
+            id: req.currentUser.id,
+        },
+        data: {
+            firstName,
+            lastName,
+            username,
+            jobTitle,
+        },
+    });
+    const alreadyHavePassword = yield db_setup_1.default.password.findUnique({
+        where: { userId: req.currentUser.id },
+    });
+    if (alreadyHavePassword) {
+        yield db_setup_1.default.password.update({
+            where: { userId: req.currentUser.id },
+            data: { password: yield (0, auth_1.saltValue)(password) },
+        });
+    }
+    else {
+        yield db_setup_1.default.password.create({
+            data: {
+                userId: req.currentUser.id,
+                password: yield (0, auth_1.saltValue)(password),
+            },
+        });
+    }
+    res.status(200).json({
+        success: true,
+        message: 'User has been updated',
     });
 }));

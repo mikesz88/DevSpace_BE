@@ -25,7 +25,12 @@ export const jwtInfoSchema = z.object({
 
 export const UpdatePartOneZObject = z
   .object({
-    email: z.string().email(),
+    firstName: z.string(),
+    lastName: z.string(),
+    username: z.string(),
+    jobTitle: z.string(),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
   })
   .strict();
 
