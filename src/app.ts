@@ -1,10 +1,10 @@
+import { User as prismaUser } from '@prisma/client';
 import express from 'express';
 import 'express-async-errors';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { User as prismaUser } from '@prisma/client';
 
 const morgan = require('morgan');
 const xss = require('xss-clean');
