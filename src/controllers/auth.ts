@@ -6,8 +6,13 @@ import {
   matchSaltedValue,
   sendTokenResponse,
   extractUsername,
+  getRandomHexColor,
 } from '../utils/auth';
-import { LoginUserType, RegisterUserType } from '../zodTypes/auth.types';
+import {
+  LoginUserType,
+  RegisterUserType,
+  UpdatePartOneType,
+} from '../zodTypes/auth.types';
 
 // * @desc Login
 // * @route POST /api/v1/auth/login
@@ -109,5 +114,33 @@ exports.register = asyncHandler(
     });
 
     sendTokenResponse(user.id, 201, res);
+  }
+);
+
+// * @desc GET random color
+// * @route GET /api/v1/auth/randomColor
+// * @access PUBLIC
+exports.randomColor = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const randomColor = getRandomHexColor();
+
+    res.status(200).json({
+      success: true,
+      data: randomColor,
+    });
+  }
+);
+
+// * @desc Update Profile part one
+// * @route GET /api/v1/auth/registerPartOne
+// * @access PRIVATE
+exports.randomColor = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const {}: UpdatePartOneType = req.body;
+
+    res.status(200).json({
+      success: true,
+      data: {},
+    });
   }
 );

@@ -47,7 +47,6 @@ export const extractUsername = (email: string): string | false => {
   if (atIndex !== -1) {
     return email.substring(0, atIndex);
   } else {
-    // The email doesn't contain '@'
     return false;
   }
 };
