@@ -6,7 +6,7 @@
     "start": "NODE_ENV=production node dist/src/app.js",
     "dev": "nodemon",
     "seed": "ts-node prisma/seed.ts",
-    "build": "tsc"
+    "tsc": "tsc"
   },
   "keywords": [],
   "author": "",
