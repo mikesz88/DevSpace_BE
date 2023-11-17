@@ -122,3 +122,23 @@
     "success": true,
     "message": "User has been updated"
     }
+- **UpdatePartTwo**
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/updatePartTwo
+  - PATCH
+  - BODY REQUIRED
+    - KEYS:
+      - backgroundColor
+      - complimentingColor
+      - favSlogan
+      - favMusic
+      - avatar
+      - biography
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer ${TOKEN}
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"} - 400 - Invalid Avatar URL || Invalid Hex Color Code. Please try again. - 200 - Response: {
+    "success": true,
+    "message": "User has been updated"
+    }
