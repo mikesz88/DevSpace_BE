@@ -32,9 +32,12 @@ export const sendTokenResponse = (
 };
 
 export const getDataFromAuthToken = (token?: string) => {
+  console.log({ token });
+
   if (!token) return null;
 
   try {
+    console.log(jwtInfoSchema.parse(jwt.verify(token, process.env.JWT_SECRET)));
     return jwtInfoSchema.parse(jwt.verify(token, process.env.JWT_SECRET));
   } catch (e) {
     return null;
