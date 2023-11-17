@@ -54,7 +54,6 @@ router.patch(
   updatePartTwo
 );
 
-// !test
 router.get('/availableFriends', protect, availableFriends);
 router.get('/myFriendCount', protect, myFriendCount);
 router.get('/myFriendsUsernames', protect, myFriendsUsernames);
@@ -73,7 +72,7 @@ router.patch(
   removeFriends
 );
 router.patch(
-  '/removeFriends',
+  '/createTop8Friends',
   protect,
   validateRequestBody(MyTop8FriendsTypeZObject),
   createTop8Friends

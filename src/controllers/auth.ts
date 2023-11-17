@@ -73,7 +73,38 @@ exports.getLoggedInUser = asyncHandler(
   async (req: Request, res: Response, _next: NextFunction) => {
     const user = await db.user.findUnique({
       where: { id: req.currentUser!.id },
+      include: { avatar: { select: { avatarURL: true } } },
     });
+
+    const modifiedUser = {
+      ...user,
+      avatar: user!.avatar!.avatarURL,
+    };
+
+    const myTopEightFriendsIds = modifiedUser!.topEight!;
+
+    const top8FriendQueries = myTopEightFriendsIds.map(async (friendId) => {
+      const friend = await db.user.findUnique({
+        where: { id: friendId },
+        select: { username: true, avatar: { select: { avatarURL: true } } },
+      });
+      return friend!;
+    });
+
+    const myTop8FriendsUsernames = (await Promise.all(top8FriendQueries)).map(
+      (friend) => ({
+        username: friend.username,
+        avatarURL: friend.avatar!.avatarURL,
+      })
+    );
+
+    const finalFriend = {
+      ...modifiedUser,
+      topEight: myTop8FriendsUsernames,
+      friendCount: modifiedUser.friendIds!.length,
+    };
+
+    res.status(200).json({ success: true, data: finalFriend });
 
     res.status(200).json({
       success: true,
@@ -297,7 +328,17 @@ exports.availableFriends = asyncHandler(
         !myIdAndCurrentFriendsIdsOnly.includes(potentialFriendId)
     );
 
-    res.status(200).json({ success: true, data: eligibleFriends });
+    const friendQueries = eligibleFriends.map(async (friendId) => {
+      const friend = await db.user.findUnique({
+        where: { id: friendId },
+        select: { username: true },
+      });
+      return friend!.username;
+    });
+
+    const eligibleFriendsUsernames = await Promise.all(friendQueries);
+
+    res.status(200).json({ success: true, data: eligibleFriendsUsernames });
   }
 );
 
@@ -319,7 +360,7 @@ exports.myFriendCount = asyncHandler(
 // * @desc All my friends Usernames
 // * @route GET /api/v1/auth/myFriendsUsernames
 // * @access PRIVATE
-exports.addFriend = asyncHandler(
+exports.myFriendsUsernames = asyncHandler(
   async (req: Request, res: Response, _next: NextFunction) => {
     const myFriends = await db.user.findUnique({
       where: { id: req.currentUser!.id },
@@ -440,7 +481,9 @@ exports.myTopEightFriends = asyncHandler(
     const myTop8FriendsUsernames = (await Promise.all(friendQueries)).map(
       (friend) => ({
         username: friend.username,
-        avatarURL: friend.avatar!.avatarURL,
+        avatarURL:
+          friend.avatar?.avatarURL ||
+          'https://alienbudgets.s3.amazonaws.com/001-chameleon.png',
       })
     );
 

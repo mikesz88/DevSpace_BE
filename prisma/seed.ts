@@ -33,11 +33,14 @@ export const seed = async () => {
 
   await avatarsToDB(avatars);
 
+  const listOfAvatars = await db.avatar.findMany();
+
   // seed here
   const michael = await db.user.create({
     data: {
       email: 'michael.sanchez@devspace.com',
       username: 'michael.sanchez',
+      avatarId: listOfAvatars[0].id,
       password: {
         create: {
           password: await saltValue('12345678'),
@@ -50,6 +53,9 @@ export const seed = async () => {
     data: {
       email: 'charles.best.zambrana@devspace.com',
       username: 'charles.best.zambrana',
+      avatarId: listOfAvatars[1].id,
+      friendIds: [michael.id],
+      topEight: [michael.id],
       password: {
         create: {
           password: await saltValue('12345678'),
@@ -58,10 +64,21 @@ export const seed = async () => {
     },
   });
 
+  await db.user.update({
+    where: { id: michael.id },
+    data: {
+      friendIds: [Charles.id],
+      topEight: [Charles.id],
+    },
+  });
+
   const Richard = await db.user.create({
     data: {
       email: 'richard.olpindo@devspace.com',
       username: 'richard.olpindo',
+      avatarId: listOfAvatars[2].id,
+      friendIds: [michael.id],
+      topEight: [michael.id],
       password: {
         create: {
           password: await saltValue('12345678'),
@@ -74,6 +91,9 @@ export const seed = async () => {
     data: {
       email: 'quallin.games@devspace.com',
       username: 'quallin.games',
+      avatarId: listOfAvatars[3].id,
+      friendIds: [michael.id],
+      topEight: [michael.id],
       password: {
         create: {
           password: await saltValue('12345678'),
@@ -86,6 +106,9 @@ export const seed = async () => {
     data: {
       email: 'craig.howard@devspace.com',
       username: 'craig.howard',
+      avatarId: listOfAvatars[4].id,
+      friendIds: [michael.id],
+      topEight: [michael.id],
       password: {
         create: {
           password: await saltValue('12345678'),

@@ -142,3 +142,107 @@
     "success": true,
     "message": "User has been updated"
     }
+- **Available Friends**
+  - Route:
+    - https://devspace.cyclic.app/api/v1/auth/availableFriends
+  - GET
+  - NO BODY
+  - Response
+    - 200 - Success
+      - Message: {"success": true, "data": list of usernames not already in friend list}
+- **My Friend Count**
+  - Route:
+    - https://devspace.cyclic.app/api/v1/auth/myFriendCount
+  - GET
+  - NO BODY
+  - Response
+    - 200 - Success
+      - Message: {"success": true, "data": # of friends}
+- **My Friends Usernames**
+  - Route:
+    - https://devspace.cyclic.app/api/v1/auth/myFriendsUsernames
+  - GET
+  - NO BODY
+  - Response
+    - 200 - Success
+      - Message: {"success": true, "data": list of my friends usernames}
+- **My Top Eight Friends**
+  - Route:
+    - https://devspace.cyclic.app/api/v1/auth/myTopEightFriends
+  - GET
+  - NO BODY
+  - Response
+    - 200 - Success
+      - Message: {"success": true, "data": list of my top 8 friends usernames}
+- **Delete Me**
+  - Route:
+    - https://devspace.cyclic.app/api/v1/auth/deleteMe
+  - DELETE
+  - NO BODY
+  - Response
+    - 200 - Success
+      - Message: {"success": true, "message": "User is deleted."}
+- **Add Friends**
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/addFriends
+  - PATCH
+  - BODY REQUIRED
+    - KEYS:
+      - friendUsernames: Array of usernames
+        - Example: ['usernames']
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer ${TOKEN}
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"} - 400 - Bad Username - 200 - Response: {
+    "success": true,
+    "message": "Friends List Updated"
+    }
+- **Remove Friends**
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/removeFriends
+  - PATCH
+  - BODY REQUIRED
+    - KEYS:
+      - friendUsernames: Array of usernames
+        - Example: ['usernames']
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer ${TOKEN}
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"} - 400 - Bad Username - 200 - Response: {
+    "success": true,
+    "message": "Friends List Updated"
+    }
+- **Create Top 8 Friends**
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/updatePartTwo
+  - PATCH
+  - BODY REQUIRED
+    - KEYS:
+      - friendUsernames: Array of usernames
+        - Example: ['usernames']
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer ${TOKEN}
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"} - 400 - Bad Username - 200 - Response: {
+    "success": true,
+    "message": "Top 8 Friends List Updated"
+    }
+- **Friends Profile Data**
+  - Route
+    - https://devspace.cyclic.app/api/v1/auth/friendsProfile/:username
+  - GET
+  - PARAMETER REQUIRED
+    - KEYS:
+      - username: string
+        - Example: "charles.best.zambrana"
+  - PROTECTED
+    - the auth/header should have
+      - Key: Authorization
+      - Value: Bearer ${TOKEN}
+  - Response - 401 - Unauthorized - Message: {"success": false, "message": "Invalid token"} - 400 - Bad Username - 200 - Response: {
+    "success": true,
+    "data": profile data of friend
+    }
