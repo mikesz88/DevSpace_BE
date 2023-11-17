@@ -169,7 +169,7 @@ exports.updatePartOne = (0, asyncHandler_1.default)((req, res, _next) => __await
 // * @desc Update Profile part two
 // * @route PATCH /api/v1/auth/updatePartTwo
 // * @access PRIVATE
-exports.updatePartOne = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updatePartTwo = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const { backgroundColor, complimentingColor, favSlogan, favMusic, avatar, biography, } = req.body;
     const chosenAvatar = yield db_setup_1.default.avatar.findFirst({
         where: { avatarURL: avatar },
