@@ -85,7 +85,8 @@
     "createdAt": "2023-11-15T18:00:48.018Z",
     "updatedAt": "2023-11-15T18:00:48.018Z"
     }
-    } -**Random Color**
+    }
+- **Random Color**
   - Route:
     - https://devspace.cyclic.app/api/v1/auth/randomColor
   - GET
