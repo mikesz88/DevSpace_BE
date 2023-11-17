@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRandomHexColor = exports.extractUsername = exports.getDataFromAuthToken = exports.sendTokenResponse = exports.matchSaltedValue = exports.getSignedJwt = exports.saltValue = void 0;
+exports.isHexColor = exports.getRandomHexColor = exports.extractUsername = exports.getDataFromAuthToken = exports.sendTokenResponse = exports.matchSaltedValue = exports.getSignedJwt = exports.saltValue = void 0;
 const auth_types_1 = require("../zodTypes/auth.types");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -65,3 +65,8 @@ const getRandomHexColor = () => {
     return color;
 };
 exports.getRandomHexColor = getRandomHexColor;
+const isHexColor = (hexCode) => {
+    const pattern = /^#[A-Fa-f0-9]{6}$/;
+    return pattern.test(hexCode);
+};
+exports.isHexColor = isHexColor;

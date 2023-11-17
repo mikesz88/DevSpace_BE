@@ -7,6 +7,7 @@ import {
   LoginUserZObject,
   RegisterUserZObject,
   UpdatePartOneZObject,
+  UpdatePartTwoZObject,
 } from '../zodTypes/auth.types';
 
 const {
@@ -16,6 +17,7 @@ const {
   randomColor,
   randomAvatar,
   updatePartOne,
+  updatePartTwo,
 } = require('../controllers/auth');
 
 const { protect } = require('../middleware/auth');
@@ -32,6 +34,12 @@ router.patch(
   protect,
   validateRequestBody(UpdatePartOneZObject),
   updatePartOne
+);
+router.patch(
+  '/updatePartTwo',
+  protect,
+  validateRequestBody(UpdatePartTwoZObject),
+  updatePartTwo
 );
 
 module.exports = router;

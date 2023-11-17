@@ -36,4 +36,15 @@ export const UpdatePartOneZObject = z
 
 export type UpdatePartOneType = z.infer<typeof UpdatePartOneZObject>;
 
-// UpdatePartOneType
+export const UpdatePartTwoZObject = z
+  .object({
+    backgroundColor: z.string(),
+    complimentingColor: z.string(),
+    favSlogan: z.string(),
+    favMusic: z.string(),
+    avatar: z.string().min(8),
+    biography: z.string().min(8),
+  })
+  .strict();
+
+export type UpdatePartTwoType = z.infer<typeof UpdatePartTwoZObject>;

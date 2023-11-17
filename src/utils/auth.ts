@@ -59,3 +59,9 @@ export const getRandomHexColor = () => {
   }
   return color;
 };
+
+export const isHexColor = (hexCode: string): boolean => {
+  const pattern = /^#[A-Fa-f0-9]{6}$/;
+
+  return pattern.test(hexCode);
+};

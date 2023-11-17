@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdatePartOneZObject = exports.jwtInfoSchema = exports.RegisterUserZObject = exports.LoginUserZObject = void 0;
+exports.UpdatePartTwoZObject = exports.UpdatePartOneZObject = exports.jwtInfoSchema = exports.RegisterUserZObject = exports.LoginUserZObject = void 0;
 const zod_1 = require("zod");
 exports.LoginUserZObject = zod_1.z
     .object({
@@ -28,4 +28,13 @@ exports.UpdatePartOneZObject = zod_1.z
     confirmPassword: zod_1.z.string().min(8),
 })
     .strict();
-// UpdatePartOneType
+exports.UpdatePartTwoZObject = zod_1.z
+    .object({
+    backgroundColor: zod_1.z.string(),
+    complimentingColor: zod_1.z.string(),
+    favSlogan: zod_1.z.string(),
+    favMusic: zod_1.z.string(),
+    avatar: zod_1.z.string().min(8),
+    biography: zod_1.z.string().min(8),
+})
+    .strict();

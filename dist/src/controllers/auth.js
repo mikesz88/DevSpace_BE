@@ -166,3 +166,39 @@ exports.updatePartOne = (0, asyncHandler_1.default)((req, res, _next) => __await
         message: 'User has been updated',
     });
 }));
+// * @desc Update Profile part two
+// * @route PATCH /api/v1/auth/updatePartTwo
+// * @access PRIVATE
+exports.updatePartOne = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { backgroundColor, complimentingColor, favSlogan, favMusic, avatar, biography, } = req.body;
+    const chosenAvatar = yield db_setup_1.default.avatar.findFirst({
+        where: { avatarURL: avatar },
+    });
+    if (!chosenAvatar) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid Avatar URL.',
+        });
+    }
+    if (!(0, auth_1.isHexColor)(backgroundColor) || !(0, auth_1.isHexColor)(complimentingColor)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid Hex Color Code. Please try again.',
+        });
+    }
+    yield db_setup_1.default.user.update({
+        where: { id: req.currentUser.id },
+        data: {
+            backgroundColor,
+            complimentingColor,
+            favSlogan: favSlogan || 'I chose to be lazy and not write one.',
+            favMusic: favMusic || 'I chose to be lazy and not write one.',
+            avatarId: chosenAvatar.id,
+            biography: biography || 'I chose to be lazy and not write one.',
+        },
+    });
+    res.status(200).json({
+        success: true,
+        message: 'User has been updated',
+    });
+}));

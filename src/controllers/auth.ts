@@ -7,12 +7,15 @@ import {
   sendTokenResponse,
   extractUsername,
   getRandomHexColor,
+  isHexColor,
 } from '../utils/auth';
 import {
   LoginUserType,
   RegisterUserType,
   UpdatePartOneType,
+  UpdatePartTwoType,
 } from '../zodTypes/auth.types';
+import { Avatar } from '@prisma/client';
 
 // * @desc Login
 // * @route POST /api/v1/auth/login
@@ -212,6 +215,57 @@ exports.updatePartOne = asyncHandler(
         },
       });
     }
+
+    res.status(200).json({
+      success: true,
+      message: 'User has been updated',
+    });
+  }
+);
+
+// * @desc Update Profile part two
+// * @route PATCH /api/v1/auth/updatePartTwo
+// * @access PRIVATE
+exports.updatePartTwo = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const {
+      backgroundColor,
+      complimentingColor,
+      favSlogan,
+      favMusic,
+      avatar,
+      biography,
+    }: UpdatePartTwoType = req.body;
+
+    const chosenAvatar = await db.avatar.findFirst({
+      where: { avatarURL: avatar },
+    });
+
+    if (!chosenAvatar) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Avatar URL.',
+      });
+    }
+
+    if (!isHexColor(backgroundColor) || !isHexColor(complimentingColor)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Hex Color Code. Please try again.',
+      });
+    }
+
+    await db.user.update({
+      where: { id: req.currentUser!.id },
+      data: {
+        backgroundColor,
+        complimentingColor,
+        favSlogan: favSlogan || 'I chose to be lazy and not write one.',
+        favMusic: favMusic || 'I chose to be lazy and not write one.',
+        avatarId: chosenAvatar.id,
+        biography: biography || 'I chose to be lazy and not write one.',
+      },
+    });
 
     res.status(200).json({
       success: true,
