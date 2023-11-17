@@ -10,12 +10,14 @@ import {
   isHexColor,
 } from '../utils/auth';
 import {
+  AddOrRemoveFriendType,
+  FriendsUsernameType,
   LoginUserType,
+  MyTop8FriendsType,
   RegisterUserType,
   UpdatePartOneType,
   UpdatePartTwoType,
 } from '../zodTypes/auth.types';
-import { Avatar } from '@prisma/client';
 
 // * @desc Login
 // * @route POST /api/v1/auth/login
@@ -271,5 +273,303 @@ exports.updatePartTwo = asyncHandler(
       success: true,
       message: 'User has been updated',
     });
+  }
+);
+
+// * @desc List of Available Friends
+// * @route GET /api/v1/auth/availableFriends
+// * @access PRIVATE
+exports.availableFriends = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const myCurrentFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { friendIds: true },
+    });
+    const myIdAndCurrentFriendsIdsOnly = myCurrentFriends!.friendIds;
+    myIdAndCurrentFriendsIdsOnly.push(req.currentUser!.id);
+
+    const allUsers = (await db.user.findMany({ select: { id: true } })).map(
+      (user) => user.id
+    );
+
+    const eligibleFriends = allUsers.filter(
+      (potentialFriendId) =>
+        !myIdAndCurrentFriendsIdsOnly.includes(potentialFriendId)
+    );
+
+    res.status(200).json({ success: true, data: eligibleFriends });
+  }
+);
+
+// * @desc Friends Count
+// * @route GET /api/v1/auth/myFriendCount
+// * @access PRIVATE
+exports.myFriendCount = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const myFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { friendIds: true },
+    });
+    const myFriendsCount = myFriends!.friendIds.length;
+
+    res.status(200).json({ success: true, data: myFriendsCount });
+  }
+);
+
+// * @desc All my friends Usernames
+// * @route GET /api/v1/auth/myFriendsUsernames
+// * @access PRIVATE
+exports.addFriend = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const myFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { friendIds: true },
+    });
+
+    const myFriendsIds = myFriends!.friendIds;
+
+    const friendQueries = myFriendsIds.map(async (friendId) => {
+      const friend = await db.user.findUnique({
+        where: { id: friendId },
+        select: { username: true },
+      });
+      return friend!.username;
+    });
+
+    const friendsUsernames = await Promise.all(friendQueries);
+
+    res.status(200).json({ success: true, data: friendsUsernames });
+  }
+);
+
+// * @desc Add Friend
+// * @route PATCH /api/v1/auth/addFriends
+// * @access PRIVATE
+exports.addFriends = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { friendUsernames }: AddOrRemoveFriendType = req.body;
+
+    const friendQueries = friendUsernames.map(async (friendUsername) => {
+      const friend = await db.user.findUnique({
+        where: { username: friendUsername },
+        select: { id: true },
+      });
+      return friend!.id;
+    });
+
+    const newFriendsIds = await Promise.all(friendQueries);
+
+    const myCurrentFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { friendIds: true },
+    });
+
+    const myCurrentFriendsId = myCurrentFriends!.friendIds;
+
+    const combinedArrayOfOldAndNewFriendsIds = [
+      ...myCurrentFriendsId,
+      ...newFriendsIds,
+    ];
+
+    await db.user.update({
+      where: { id: req.currentUser!.id },
+      data: { friendIds: combinedArrayOfOldAndNewFriendsIds },
+    });
+
+    res.status(200).json({ success: true, message: 'Friend list updated.' });
+  }
+);
+
+// * @desc Remove Friend
+// * @route PATCH /api/v1/auth/removeFriends
+// * @access PRIVATE
+exports.removeFriends = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { friendUsernames }: AddOrRemoveFriendType = req.body;
+
+    const friendQueries = friendUsernames.map(async (friendUsername) => {
+      const friend = await db.user.findUnique({
+        where: { username: friendUsername },
+        select: { id: true },
+      });
+      return friend!.id;
+    });
+
+    const removingFriendsIds = await Promise.all(friendQueries);
+
+    const myCurrentFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { friendIds: true },
+    });
+
+    const myCurrentFriendsId = myCurrentFriends!.friendIds;
+
+    const myUpdatedFriendList = myCurrentFriendsId.filter(
+      (friendId) => !removingFriendsIds.includes(friendId)
+    );
+
+    await db.user.update({
+      where: { id: req.currentUser!.id },
+      data: { friendIds: myUpdatedFriendList },
+    });
+
+    res.status(200).json({ success: true, message: 'Friend list updated.' });
+  }
+);
+
+// * @desc My current Top 8 Friends
+// * @route GET /api/v1/auth/myTopEightFriends
+// * @access PRIVATE
+exports.myTopEightFriends = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const myTopEightFriends = await db.user.findUnique({
+      where: { id: req.currentUser!.id },
+      select: { topEight: true },
+    });
+
+    const myTopEightFriendsIds = myTopEightFriends!.topEight;
+
+    const friendQueries = myTopEightFriendsIds.map(async (friendId) => {
+      const friend = await db.user.findUnique({
+        where: { id: friendId },
+        select: { username: true, avatar: { select: { avatarURL: true } } },
+      });
+      return friend!;
+    });
+
+    const myTop8FriendsUsernames = (await Promise.all(friendQueries)).map(
+      (friend) => ({
+        username: friend.username,
+        avatarURL: friend.avatar!.avatarURL,
+      })
+    );
+
+    res.status(200).json({ success: true, data: myTop8FriendsUsernames });
+  }
+);
+
+// * @desc Create My Top 8 Friends
+// * @route PATCH /api/v1/auth/createTop8Friends
+// * @access PRIVATE
+exports.createTop8Friends = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const { myChosenFriendsUsernames }: MyTop8FriendsType = req.body;
+
+    const friendQueries = myChosenFriendsUsernames.map(
+      async (friendUsername) => {
+        const friend = await db.user.findUnique({
+          where: { username: friendUsername },
+          select: { id: true },
+        });
+        return friend!.id;
+      }
+    );
+
+    const myTop8FriendsIds = await Promise.all(friendQueries);
+
+    await db.user.update({
+      where: { id: req.currentUser!.id },
+      data: { topEight: myTop8FriendsIds },
+    });
+
+    res
+      .status(200)
+      .json({ success: true, message: 'Top 8 Friends, completed.' });
+  }
+);
+
+// * @desc Delete Profile
+// * @route DELETE /api/v1/auth/deleteMe
+// * @access PRIVATE
+exports.deleteMe = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const usersWhoFriendedMe = await db.user.findMany({
+      where: {
+        friendIds: {
+          has: req.currentUser!.id,
+        },
+      },
+    });
+
+    const usersWhoTop8Me = await db.user.findMany({
+      where: {
+        topEight: {
+          has: req.currentUser!.id,
+        },
+      },
+    });
+
+    const usersToUpdate = [...usersWhoFriendedMe, ...usersWhoTop8Me];
+
+    if (usersToUpdate.length === 0) {
+      await db.user.delete({ where: { id: req.currentUser!.id } });
+      return res.status(200).json({ success: true, message: 'User Deleted.' });
+    }
+
+    const updatePromises = usersToUpdate.map(async (user) => {
+      const updatedFriendIds = user.friendIds.filter(
+        (id) => id !== req.currentUser!.id
+      );
+      const updatedTopEight = user.topEight.filter(
+        (id) => id !== req.currentUser!.id
+      );
+
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          friendIds: updatedFriendIds,
+          topEight: updatedTopEight,
+        },
+      });
+    });
+
+    await Promise.all(updatePromises);
+
+    await db.user.delete({ where: { id: req.currentUser!.id } });
+    res.status(200).json({ success: true, message: 'User Deleted.' });
+  }
+);
+
+// * @desc Friends Profile
+// * @route GET /api/v1/auth/friendsProfile/:username
+// * @access PRIVATE
+exports.friendsProfile = asyncHandler(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const username: string = req.params.username;
+
+    const friendsProfile = await db.user.findUnique({
+      where: { username },
+      include: { avatar: { select: { avatarURL: true } } },
+    });
+
+    const modifiedUser = {
+      ...friendsProfile,
+      avatar: friendsProfile!.avatar!.avatarURL,
+    };
+
+    const myTopEightFriendsIds = modifiedUser!.topEight!;
+
+    const top8FriendQueries = myTopEightFriendsIds.map(async (friendId) => {
+      const friend = await db.user.findUnique({
+        where: { id: friendId },
+        select: { username: true, avatar: { select: { avatarURL: true } } },
+      });
+      return friend!;
+    });
+
+    const myTop8FriendsUsernames = (await Promise.all(top8FriendQueries)).map(
+      (friend) => ({
+        username: friend.username,
+        avatarURL: friend.avatar!.avatarURL,
+      })
+    );
+
+    const finalFriend = {
+      ...modifiedUser,
+      topEight: myTop8FriendsUsernames,
+      friendCount: modifiedUser.friendIds!.length,
+    };
+
+    res.status(200).json({ success: true, data: finalFriend });
   }
 );

@@ -4,7 +4,10 @@ import {
   validateRequestParams,
 } from 'zod-express-middleware';
 import {
+  AddOrRemoveFriendZObject,
+  FriendsUsernameZObject,
   LoginUserZObject,
+  MyTop8FriendsTypeZObject,
   RegisterUserZObject,
   UpdatePartOneZObject,
   UpdatePartTwoZObject,
@@ -18,6 +21,15 @@ const {
   randomAvatar,
   updatePartOne,
   updatePartTwo,
+  availableFriends,
+  myFriendCount,
+  myFriendsUsernames,
+  addFriends,
+  removeFriends,
+  myTopEightFriends,
+  createTop8Friends,
+  deleteMe,
+  friendsProfile,
 } = require('../controllers/auth');
 
 const { protect } = require('../middleware/auth');
@@ -40,6 +52,37 @@ router.patch(
   protect,
   validateRequestBody(UpdatePartTwoZObject),
   updatePartTwo
+);
+
+// !test
+router.get('/availableFriends', protect, availableFriends);
+router.get('/myFriendCount', protect, myFriendCount);
+router.get('/myFriendsUsernames', protect, myFriendsUsernames);
+router.get('/myTopEightFriends', protect, myTopEightFriends);
+router.delete('/deleteMe', protect, deleteMe);
+router.patch(
+  '/addFriends',
+  protect,
+  validateRequestBody(AddOrRemoveFriendZObject),
+  addFriends
+);
+router.patch(
+  '/removeFriends',
+  protect,
+  validateRequestBody(AddOrRemoveFriendZObject),
+  removeFriends
+);
+router.patch(
+  '/removeFriends',
+  protect,
+  validateRequestBody(MyTop8FriendsTypeZObject),
+  createTop8Friends
+);
+router.get(
+  '/friendsProfile/:username',
+  protect,
+  validateRequestParams(FriendsUsernameZObject),
+  friendsProfile
 );
 
 module.exports = router;

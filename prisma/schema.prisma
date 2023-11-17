@@ -25,6 +25,8 @@ model User {
   avatar             Avatar?   @relation(fields: [avatarId], references: [id])
   avatarId           String?   @db.ObjectId
   email              String    @unique
+  friendIds          String[]  @db.ObjectId
+  topEight           String[]  @db.ObjectId
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 }
@@ -42,7 +44,7 @@ model Avatar {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   avatarURL String
-  users     User[]
+  users     User[] 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

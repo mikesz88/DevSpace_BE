@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { string, z } from 'zod';
 
 export const LoginUserZObject = z
   .object({
@@ -48,3 +48,28 @@ export const UpdatePartTwoZObject = z
   .strict();
 
 export type UpdatePartTwoType = z.infer<typeof UpdatePartTwoZObject>;
+
+export const AddOrRemoveFriendZObject = z
+  .object({
+    friendUsernames: z.array(z.string()),
+  })
+  .strict();
+
+export type AddOrRemoveFriendType = z.infer<typeof AddOrRemoveFriendZObject>;
+
+export const MyTop8FriendsTypeZObject = z
+  .object({
+    myChosenFriendsUsernames: z.array(z.string()),
+  })
+  .strict();
+
+export type MyTop8FriendsType = z.infer<typeof MyTop8FriendsTypeZObject>;
+// friendsUsernameZObject
+
+export const FriendsUsernameZObject = z
+  .object({
+    username: z.string(),
+  })
+  .strict();
+
+export type FriendsUsernameType = z.infer<typeof FriendsUsernameZObject>;
