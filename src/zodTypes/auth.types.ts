@@ -42,8 +42,8 @@ export const UpdatePartTwoZObject = z
     complimentingColor: z.string(),
     favSlogan: z.string(),
     favMusic: z.string(),
-    avatar: z.string().min(8),
-    biography: z.string().min(8),
+    avatar: z.string().url(),
+    biography: z.string(),
   })
   .strict();
 
