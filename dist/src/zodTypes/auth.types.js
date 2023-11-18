@@ -34,8 +34,8 @@ exports.UpdatePartTwoZObject = zod_1.z
     complimentingColor: zod_1.z.string(),
     favSlogan: zod_1.z.string(),
     favMusic: zod_1.z.string(),
-    avatar: zod_1.z.string().min(8),
-    biography: zod_1.z.string().min(8),
+    avatar: zod_1.z.string().url(),
+    biography: zod_1.z.string(),
 })
     .strict();
 exports.AddOrRemoveFriendZObject = zod_1.z
