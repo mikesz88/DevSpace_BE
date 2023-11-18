@@ -56,7 +56,23 @@ exports.login = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 
 exports.getLoggedInUser = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield db_setup_1.default.user.findUnique({
         where: { id: req.currentUser.id },
+        include: { avatar: { select: { avatarURL: true } } },
     });
+    const modifiedUser = Object.assign(Object.assign({}, user), { avatar: user.avatar.avatarURL });
+    const myTopEightFriendsIds = modifiedUser.topEight;
+    const top8FriendQueries = myTopEightFriendsIds.map((friendId) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { id: friendId },
+            select: { username: true, avatar: { select: { avatarURL: true } } },
+        });
+        return friend;
+    }));
+    const myTop8FriendsUsernames = (yield Promise.all(top8FriendQueries)).map((friend) => ({
+        username: friend.username,
+        avatarURL: friend.avatar.avatarURL,
+    }));
+    const finalFriend = Object.assign(Object.assign({}, modifiedUser), { topEight: myTop8FriendsUsernames, friendCount: modifiedUser.friendIds.length });
+    res.status(200).json({ success: true, data: finalFriend });
     res.status(200).json({
         success: true,
         data: user,
@@ -201,4 +217,219 @@ exports.updatePartTwo = (0, asyncHandler_1.default)((req, res, _next) => __await
         success: true,
         message: 'User has been updated',
     });
+}));
+// * @desc List of Available Friends
+// * @route GET /api/v1/auth/availableFriends
+// * @access PRIVATE
+exports.availableFriends = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const myCurrentFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { friendIds: true },
+    });
+    const myIdAndCurrentFriendsIdsOnly = myCurrentFriends.friendIds;
+    myIdAndCurrentFriendsIdsOnly.push(req.currentUser.id);
+    const allUsers = (yield db_setup_1.default.user.findMany({ select: { id: true } })).map((user) => user.id);
+    const eligibleFriends = allUsers.filter((potentialFriendId) => !myIdAndCurrentFriendsIdsOnly.includes(potentialFriendId));
+    const friendQueries = eligibleFriends.map((friendId) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { id: friendId },
+            select: { username: true },
+        });
+        return friend.username;
+    }));
+    const eligibleFriendsUsernames = yield Promise.all(friendQueries);
+    res.status(200).json({ success: true, data: eligibleFriendsUsernames });
+}));
+// * @desc Friends Count
+// * @route GET /api/v1/auth/myFriendCount
+// * @access PRIVATE
+exports.myFriendCount = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const myFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { friendIds: true },
+    });
+    const myFriendsCount = myFriends.friendIds.length;
+    res.status(200).json({ success: true, data: myFriendsCount });
+}));
+// * @desc All my friends Usernames
+// * @route GET /api/v1/auth/myFriendsUsernames
+// * @access PRIVATE
+exports.myFriendsUsernames = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const myFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { friendIds: true },
+    });
+    const myFriendsIds = myFriends.friendIds;
+    const friendQueries = myFriendsIds.map((friendId) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { id: friendId },
+            select: { username: true },
+        });
+        return friend.username;
+    }));
+    const friendsUsernames = yield Promise.all(friendQueries);
+    res.status(200).json({ success: true, data: friendsUsernames });
+}));
+// * @desc Add Friend
+// * @route PATCH /api/v1/auth/addFriends
+// * @access PRIVATE
+exports.addFriends = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { friendUsernames } = req.body;
+    const friendQueries = friendUsernames.map((friendUsername) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { username: friendUsername },
+            select: { id: true },
+        });
+        return friend.id;
+    }));
+    const newFriendsIds = yield Promise.all(friendQueries);
+    const myCurrentFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { friendIds: true },
+    });
+    const myCurrentFriendsId = myCurrentFriends.friendIds;
+    const combinedArrayOfOldAndNewFriendsIds = [
+        ...myCurrentFriendsId,
+        ...newFriendsIds,
+    ];
+    yield db_setup_1.default.user.update({
+        where: { id: req.currentUser.id },
+        data: { friendIds: combinedArrayOfOldAndNewFriendsIds },
+    });
+    res.status(200).json({ success: true, message: 'Friend list updated.' });
+}));
+// * @desc Remove Friend
+// * @route PATCH /api/v1/auth/removeFriends
+// * @access PRIVATE
+exports.removeFriends = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { friendUsernames } = req.body;
+    const friendQueries = friendUsernames.map((friendUsername) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { username: friendUsername },
+            select: { id: true },
+        });
+        return friend.id;
+    }));
+    const removingFriendsIds = yield Promise.all(friendQueries);
+    const myCurrentFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { friendIds: true },
+    });
+    const myCurrentFriendsId = myCurrentFriends.friendIds;
+    const myUpdatedFriendList = myCurrentFriendsId.filter((friendId) => !removingFriendsIds.includes(friendId));
+    yield db_setup_1.default.user.update({
+        where: { id: req.currentUser.id },
+        data: { friendIds: myUpdatedFriendList },
+    });
+    res.status(200).json({ success: true, message: 'Friend list updated.' });
+}));
+// * @desc My current Top 8 Friends
+// * @route GET /api/v1/auth/myTopEightFriends
+// * @access PRIVATE
+exports.myTopEightFriends = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const myTopEightFriends = yield db_setup_1.default.user.findUnique({
+        where: { id: req.currentUser.id },
+        select: { topEight: true },
+    });
+    const myTopEightFriendsIds = myTopEightFriends.topEight;
+    const friendQueries = myTopEightFriendsIds.map((friendId) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { id: friendId },
+            select: { username: true, avatar: { select: { avatarURL: true } } },
+        });
+        return friend;
+    }));
+    const myTop8FriendsUsernames = (yield Promise.all(friendQueries)).map((friend) => {
+        var _a;
+        return ({
+            username: friend.username,
+            avatarURL: ((_a = friend.avatar) === null || _a === void 0 ? void 0 : _a.avatarURL) ||
+                'https://alienbudgets.s3.amazonaws.com/001-chameleon.png',
+        });
+    });
+    res.status(200).json({ success: true, data: myTop8FriendsUsernames });
+}));
+// * @desc Create My Top 8 Friends
+// * @route PATCH /api/v1/auth/createTop8Friends
+// * @access PRIVATE
+exports.createTop8Friends = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { myChosenFriendsUsernames } = req.body;
+    const friendQueries = myChosenFriendsUsernames.map((friendUsername) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { username: friendUsername },
+            select: { id: true },
+        });
+        return friend.id;
+    }));
+    const myTop8FriendsIds = yield Promise.all(friendQueries);
+    yield db_setup_1.default.user.update({
+        where: { id: req.currentUser.id },
+        data: { topEight: myTop8FriendsIds },
+    });
+    res
+        .status(200)
+        .json({ success: true, message: 'Top 8 Friends, completed.' });
+}));
+// * @desc Delete Profile
+// * @route DELETE /api/v1/auth/deleteMe
+// * @access PRIVATE
+exports.deleteMe = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const usersWhoFriendedMe = yield db_setup_1.default.user.findMany({
+        where: {
+            friendIds: {
+                has: req.currentUser.id,
+            },
+        },
+    });
+    const usersWhoTop8Me = yield db_setup_1.default.user.findMany({
+        where: {
+            topEight: {
+                has: req.currentUser.id,
+            },
+        },
+    });
+    const usersToUpdate = [...usersWhoFriendedMe, ...usersWhoTop8Me];
+    if (usersToUpdate.length === 0) {
+        yield db_setup_1.default.user.delete({ where: { id: req.currentUser.id } });
+        return res.status(200).json({ success: true, message: 'User Deleted.' });
+    }
+    const updatePromises = usersToUpdate.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+        const updatedFriendIds = user.friendIds.filter((id) => id !== req.currentUser.id);
+        const updatedTopEight = user.topEight.filter((id) => id !== req.currentUser.id);
+        yield db_setup_1.default.user.update({
+            where: { id: user.id },
+            data: {
+                friendIds: updatedFriendIds,
+                topEight: updatedTopEight,
+            },
+        });
+    }));
+    yield Promise.all(updatePromises);
+    yield db_setup_1.default.user.delete({ where: { id: req.currentUser.id } });
+    res.status(200).json({ success: true, message: 'User Deleted.' });
+}));
+// * @desc Friends Profile
+// * @route GET /api/v1/auth/friendsProfile/:username
+// * @access PRIVATE
+exports.friendsProfile = (0, asyncHandler_1.default)((req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    const username = req.params.username;
+    const friendsProfile = yield db_setup_1.default.user.findUnique({
+        where: { username },
+        include: { avatar: { select: { avatarURL: true } } },
+    });
+    const modifiedUser = Object.assign(Object.assign({}, friendsProfile), { avatar: friendsProfile.avatar.avatarURL });
+    const myTopEightFriendsIds = modifiedUser.topEight;
+    const top8FriendQueries = myTopEightFriendsIds.map((friendId) => __awaiter(void 0, void 0, void 0, function* () {
+        const friend = yield db_setup_1.default.user.findUnique({
+            where: { id: friendId },
+            select: { username: true, avatar: { select: { avatarURL: true } } },
+        });
+        return friend;
+    }));
+    const myTop8FriendsUsernames = (yield Promise.all(top8FriendQueries)).map((friend) => ({
+        username: friend.username,
+        avatarURL: friend.avatar.avatarURL,
+    }));
+    const finalFriend = Object.assign(Object.assign({}, modifiedUser), { topEight: myTop8FriendsUsernames, friendCount: modifiedUser.friendIds.length });
+    res.status(200).json({ success: true, data: finalFriend });
 }));

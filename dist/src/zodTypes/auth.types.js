@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdatePartTwoZObject = exports.UpdatePartOneZObject = exports.jwtInfoSchema = exports.RegisterUserZObject = exports.LoginUserZObject = void 0;
+exports.FriendsUsernameZObject = exports.MyTop8FriendsTypeZObject = exports.AddOrRemoveFriendZObject = exports.UpdatePartTwoZObject = exports.UpdatePartOneZObject = exports.jwtInfoSchema = exports.RegisterUserZObject = exports.LoginUserZObject = void 0;
 const zod_1 = require("zod");
 exports.LoginUserZObject = zod_1.z
     .object({
@@ -36,5 +36,21 @@ exports.UpdatePartTwoZObject = zod_1.z
     favMusic: zod_1.z.string(),
     avatar: zod_1.z.string().min(8),
     biography: zod_1.z.string().min(8),
+})
+    .strict();
+exports.AddOrRemoveFriendZObject = zod_1.z
+    .object({
+    friendUsernames: zod_1.z.array(zod_1.z.string()),
+})
+    .strict();
+exports.MyTop8FriendsTypeZObject = zod_1.z
+    .object({
+    myChosenFriendsUsernames: zod_1.z.array(zod_1.z.string()),
+})
+    .strict();
+// friendsUsernameZObject
+exports.FriendsUsernameZObject = zod_1.z
+    .object({
+    username: zod_1.z.string(),
 })
     .strict();

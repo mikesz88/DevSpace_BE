@@ -36,11 +36,13 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Seeding the database...');
     yield clearDb();
     yield avatarsToDB(avatar_1.avatars);
+    const listOfAvatars = yield db_setup_1.default.avatar.findMany();
     // seed here
     const michael = yield db_setup_1.default.user.create({
         data: {
             email: 'michael.sanchez@devspace.com',
             username: 'michael.sanchez',
+            avatarId: listOfAvatars[0].id,
             password: {
                 create: {
                     password: yield (0, auth_1.saltValue)('12345678'),
@@ -52,6 +54,9 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
         data: {
             email: 'charles.best.zambrana@devspace.com',
             username: 'charles.best.zambrana',
+            avatarId: listOfAvatars[1].id,
+            friendIds: [michael.id],
+            topEight: [michael.id],
             password: {
                 create: {
                     password: yield (0, auth_1.saltValue)('12345678'),
@@ -59,10 +64,20 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
             },
         },
     });
+    yield db_setup_1.default.user.update({
+        where: { id: michael.id },
+        data: {
+            friendIds: [Charles.id],
+            topEight: [Charles.id],
+        },
+    });
     const Richard = yield db_setup_1.default.user.create({
         data: {
             email: 'richard.olpindo@devspace.com',
             username: 'richard.olpindo',
+            avatarId: listOfAvatars[2].id,
+            friendIds: [michael.id],
+            topEight: [michael.id],
             password: {
                 create: {
                     password: yield (0, auth_1.saltValue)('12345678'),
@@ -74,6 +89,9 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
         data: {
             email: 'quallin.games@devspace.com',
             username: 'quallin.games',
+            avatarId: listOfAvatars[3].id,
+            friendIds: [michael.id],
+            topEight: [michael.id],
             password: {
                 create: {
                     password: yield (0, auth_1.saltValue)('12345678'),
@@ -85,6 +103,9 @@ const seed = () => __awaiter(void 0, void 0, void 0, function* () {
         data: {
             email: 'craig.howard@devspace.com',
             username: 'craig.howard',
+            avatarId: listOfAvatars[4].id,
+            friendIds: [michael.id],
+            topEight: [michael.id],
             password: {
                 create: {
                     password: yield (0, auth_1.saltValue)('12345678'),
